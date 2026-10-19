@@ -25,7 +25,7 @@ const AboutScreen = () => {
             }
 
             // Construct the URL with both user_id and type
-            const url = 'https://ranacorporation.webmastersinfotech.com/about.php';
+            const url = 'https://ranacorporations.com/adminpanel/about.php';
             setIcardUrl(url);  // Set the constructed URL for the WebView
         };
 

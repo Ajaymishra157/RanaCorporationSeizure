@@ -1027,6 +1027,31 @@ const FirstScreen = () => {
     }
   };
 
+  const normalizeRC = (rc) => (rc || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+  const naturalSort = (a, b) => {
+    a = normalizeRC(a);
+    b = normalizeRC(b);
+
+    const ax = [];
+    const bx = [];
+
+    a.replace(/(\d+)|(\D+)/g, (_, $1, $2) => {
+      ax.push([$1 ? parseInt($1, 10) : Infinity, $2 || ""]);
+    });
+    b.replace(/(\d+)|(\D+)/g, (_, $1, $2) => {
+      bx.push([$1 ? parseInt($1, 10) : Infinity, $2 || ""]);
+    });
+
+    while (ax.length && bx.length) {
+      const an = ax.shift();
+      const bn = bx.shift();
+      const diff = (an[0] - bn[0]) || an[1].localeCompare(bn[1]);
+      if (diff) return diff;
+    }
+    return ax.length - bx.length;
+  };
+
   const handleSearch = (query) => {
 
     if (!isAppAvailable) {
@@ -1063,19 +1088,19 @@ const FirstScreen = () => {
 
     // Build SQL depending on search type
     if (scheduleType === "Reg No") {
-      sql = `SELECT id, registration_number, vehicle_type, product 
-             FROM vehicles 
-             WHERE last_reg_no >= ? AND last_reg_no < ?`;
+      sql = `SELECT id, registration_number, vehicle_type, product, state_code
+       FROM vehicles 
+       WHERE last_reg_no >= ? AND last_reg_no < ?`;
       params = range;
     } else if (scheduleType === "Chassis No") {
-      sql = `SELECT id, chassis_no, vehicle_type, product 
-             FROM vehicles 
-             WHERE last_chassis_no >= ? AND last_chassis_no < ?`;
+      sql = `SELECT id, chassis_no, vehicle_type, product, state_code
+       FROM vehicles 
+       WHERE last_chassis_no >= ? AND last_chassis_no < ?`;
       params = range;
     } else if (scheduleType === "Engine No") {
-      sql = `SELECT id, engine_no, vehicle_type, product 
-             FROM vehicles 
-             WHERE last_engine_no >= ? AND last_engine_no < ?`;
+      sql = `SELECT id, engine_no, vehicle_type, product, state_code
+       FROM vehicles 
+       WHERE last_engine_no >= ? AND last_engine_no < ?`;
       params = range;
     }
 
@@ -1095,6 +1120,24 @@ const FirstScreen = () => {
           for (let i = 0; i < results.rows.length; i++) {
             rows.push(results.rows.item(i));
           }
+
+          const getField = (r) =>
+            scheduleType === "Reg No"
+              ? r.registration_number
+              : scheduleType === "Chassis No"
+                ? r.chassis_no
+                : r.engine_no;
+
+          rows.sort((a, b) => {
+            const aGJ = (a.state_code || "").trim().toUpperCase() === "GJ";
+            const bGJ = (b.state_code || "").trim().toUpperCase() === "GJ";
+
+            if (aGJ && !bGJ) return -1;   // GJ upar
+            if (!aGJ && bGJ) return 1;
+
+            return naturalSort(getField(a), getField(b)); // GJ01 -> GJ05 -> GJ12
+          });
+
           setSearchVehicle(rows);
           setSearchPerformed(true);
           console.log(`🔍 Found ${rows.length} matching vehicles`);
@@ -1953,43 +1996,49 @@ const FirstScreen = () => {
                   ref={flatListRef}
                   data={
                     listType === "Grid"
-                      ? transformToColumnWise(
-                        [...SearchVehicle].sort((a, b) => {
-                          const fieldA =
-                            scheduleType === "Reg No"
-                              ? a.registration_number
-                              : scheduleType === "Chassis No"
-                                ? a.chassis_no
-                                : a.engine_no;
-
-                          const fieldB =
-                            scheduleType === "Reg No"
-                              ? b.registration_number
-                              : scheduleType === "Chassis No"
-                                ? b.chassis_no
-                                : b.engine_no;
-
-                          return (fieldA || "").localeCompare(fieldB || "");
-                        })
-                      )
-                      : [...SearchVehicle].sort((a, b) => {
-                        const fieldA =
-                          scheduleType === "Reg No"
-                            ? a.registration_number
-                            : scheduleType === "Chassis No"
-                              ? a.chassis_no
-                              : a.engine_no;
-
-                        const fieldB =
-                          scheduleType === "Reg No"
-                            ? b.registration_number
-                            : scheduleType === "Chassis No"
-                              ? b.chassis_no
-                              : b.engine_no;
-
-                        return (fieldA || "").localeCompare(fieldB || "");
-                      })
+                      ? transformToColumnWise(SearchVehicle)
+                      : SearchVehicle
                   }
+                  // data={
+                  //   listType === "Grid"
+                  //     ? transformToColumnWise(
+                  //       [...SearchVehicle].sort((a, b) => {
+                  //         const fieldA =
+                  //           scheduleType === "Reg No"
+                  //             ? a.registration_number
+                  //             : scheduleType === "Chassis No"
+                  //               ? a.chassis_no
+                  //               : a.engine_no;
+
+                  //         const fieldB =
+                  //           scheduleType === "Reg No"
+                  //             ? b.registration_number
+                  //             : scheduleType === "Chassis No"
+                  //               ? b.chassis_no
+                  //               : b.engine_no;
+
+                  //         return (fieldA || "").localeCompare(fieldB || "");
+                  //       })
+                  //     )
+                  //     : [...SearchVehicle].sort((a, b) => {
+                  //       const fieldA =
+                  //         scheduleType === "Reg No"
+                  //           ? a.registration_number
+                  //           : scheduleType === "Chassis No"
+                  //             ? a.chassis_no
+                  //             : a.engine_no;
+
+                  //       const fieldB =
+                  //         scheduleType === "Reg No"
+                  //           ? b.registration_number
+                  //           : scheduleType === "Chassis No"
+                  //             ? b.chassis_no
+                  //             : b.engine_no;
+
+                  //       return (fieldA || "").localeCompare(fieldB || "");
+                  //     })
+                  // }
+
                   extraData={SearchVehicle}
                   keyExtractor={(item) => item.id.toString()}
                   renderItem={listType === 'Grid' ? renderGridItem : renderItem}

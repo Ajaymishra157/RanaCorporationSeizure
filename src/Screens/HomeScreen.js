@@ -434,7 +434,7 @@ const HomeScreen = () => {
           <TouchableOpacity
             onPress={() => {
               const imgSrc = item.staff_image
-                ? { uri: `https://easyreppo.webmastersinfotech.in/${encodeURI(item.staff_image)}` }
+                ? { uri: `https://ranacorporations.com/${encodeURI(item.staff_image)}` }
                 : account;
 
               setSelectedImage(imgSrc);  // set image
@@ -453,7 +453,7 @@ const HomeScreen = () => {
             <Image
               source={
                 item.staff_image
-                  ? { uri: `https://easyreppo.webmastersinfotech.in/${encodeURI(item.staff_image)}` }
+                  ? { uri: `https://ranacorporations.com/${encodeURI(item.staff_image)}` }
                   : account
               }
               style={{ width: '100%', height: '100%' }}

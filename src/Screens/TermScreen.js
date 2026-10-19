@@ -16,7 +16,7 @@ const TermsScreen = () => {
     const [loading, setLoading] = useState(true);
     const route = useRoute(); // <-- add this line
     const staffId = route.params?.staffId || '';
-    const webUrl = `https://ranacorporation.webmastersinfotech.com/admin/api/term_accept.php?staff_id=${staffId}`;
+    const webUrl = `https://ranacorporations.com/adminpanel/admin/api/term_accept.php?staff_id=${staffId}`;
 
     // Prevent going back without accepting/rejecting
     useEffect(() => {

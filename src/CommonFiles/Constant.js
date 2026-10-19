@@ -2,7 +2,7 @@
 // export const BASE_URL = 'https://easyreppo.com/admin/api-1.1/';
 // export const BASE_URL = 'https://easyreppo.shivayphoto.com/admin/api-1.1/';
 // export const BASE_URL = 'https://easyreppo.webmastersinfotech.in/admin/api-1.1/';
-export const BASE_URL = 'https://ranacorporation.webmastersinfotech.com/admin/api/';
+export const BASE_URL = 'https://ranacorporations.com/adminpanel/admin/api/';
 
 
 
